@@ -26,6 +26,15 @@ pub enum CoralGateError {
     #[error("Kube Api Error {0}")]
     KubeApiError(#[from] kube::Error),
 
+    #[error("Kubeconfig Error")]
+    KubeConfigError(#[from] kube::config::KubeconfigError),
+
+    #[error("Can not get root CA from config")]
+    ClientManagerRootCaMissing,
+
+    #[error("Client Manager: config is not initialized")]
+    ClientManagerConfigNotInitialized,
+
     #[error("Binary for target {target:?} not found, path: {path:?}")]
     BinaryNotFound { target: String, path: String },
 

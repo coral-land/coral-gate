@@ -82,7 +82,7 @@ impl Apply for RoleBinding {
 pub fn admin_profile() -> Profile {
     let binding = ClusterRoleBinding {
         metadata: ObjectMeta {
-            name: Some("cluster-admin-binding".into()),
+            name: Some("coralgate-cluster-admin-binding".into()),
             ..Default::default()
         },
         subjects: Some(vec![Subject {
@@ -107,7 +107,7 @@ pub fn admin_profile() -> Profile {
 pub fn cluster_readonly_profile() -> Profile {
     let binding = ClusterRoleBinding {
         metadata: ObjectMeta {
-            name: Some("cluster-readonly-binding".into()),
+            name: Some("coralgate-cluster-readonly-binding".into()),
             ..Default::default()
         },
         subjects: Some(vec![Subject {

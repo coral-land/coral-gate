@@ -1,6 +1,7 @@
 mod command;
 mod core;
 mod error;
+mod shared;
 
 use clap::Parser;
 use error::*;

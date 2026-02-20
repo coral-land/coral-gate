@@ -1,5 +1,5 @@
 use crate::{command::structure::GenerateArgs, error::*};
-use std::{collections::BTreeMap, env, path::PathBuf};
+use std::{env, path::PathBuf};
 
 use k8s_openapi::{
     ByteString,
@@ -14,10 +14,11 @@ use tokio::time::{self, sleep};
 
 const DEFAULT_RETRIE_COUNT: i32 = 32;
 
+#[derive(Debug)]
 pub struct GeneratedCsrWithPem {
-    csr: rcgen::CertificateSigningRequest,
-    key_pair: rcgen::KeyPair,
-    key_pem: String,
+    pub csr: rcgen::CertificateSigningRequest,
+    pub key_pair: rcgen::KeyPair,
+    pub key_pem: String,
 }
 
 pub async fn generate_certificate(user: &str, group: &str) -> Result<GeneratedCsrWithPem> {
@@ -42,20 +43,6 @@ pub async fn generate_certificate(user: &str, group: &str) -> Result<GeneratedCs
     })
 }
 
-/// TODO: Move to shared or utils
-pub fn generate_lables(
-    user: &String,
-    group: &String,
-) -> Option<BTreeMap<std::string::String, std::string::String>> {
-    let mut labels: BTreeMap<String, String> = BTreeMap::new();
-
-    labels.insert("created-by".into(), "coralgate".into());
-    labels.insert("user".into(), user.into());
-    labels.insert("group".into(), group.into());
-
-    Some(labels)
-}
-
 /*
 * Generate Certificate Signing Request (csr) object
 * The certificates are automatically generated
@@ -64,7 +51,7 @@ pub fn generate_cert_sigining_request_object(
     gen_args: &GenerateArgs,
     certificates: &GeneratedCsrWithPem,
 ) -> Result<K8SCertificateSigningRequest> {
-    let labels = generate_lables(&gen_args.user, &gen_args.group);
+    let labels = crate::shared::generate_lables();
     let pem_string = certificates.csr.pem().unwrap();
     let request = ByteString(pem_string.into_bytes());
 
@@ -102,6 +89,7 @@ pub fn resolve_kube_path(input_path: &str) -> PathBuf {
         let stripped = input_path
             .strip_prefix("~/")
             .unwrap_or(input_path.strip_prefix("~").unwrap_or(""));
+
         path.push(stripped);
         path
     } else {

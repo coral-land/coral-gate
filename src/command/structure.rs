@@ -4,6 +4,34 @@ use clap::{Parser, Subcommand};
 const DEFAULT_KUBECONFIG: &str = "~/.kube/config";
 const DEFAULT_VALIDITY_HOURS: i32 = 24 * 30;
 
+#[derive(Debug, Clone, clap::Args)]
+pub struct CommonArgs {}
+
+macro_rules! define_args {
+    (
+        $vis:vis struct $name:ident {
+            $(
+                $(#[$attr:meta])*
+                $vis_field:vis $field:ident: $ty:ty
+            ),* $(,)?
+        }
+    ) => {
+        #[derive(Debug, Clone, clap::Args)]
+        $vis struct $name {
+            #[arg(long, default_value = DEFAULT_KUBECONFIG)]
+            pub kubeconfig: Option<String>,
+
+            #[arg(short, long)]
+            pub namespace: Option<String>,
+
+            $(
+                $(#[$attr])*
+                $vis_field $field: $ty,
+            )*
+        }
+    };
+}
+
 #[derive(Parser, Debug, Clone)]
 #[command(version, about = "This is a package for you to create temporary safe kubeconfigs", long_about = None)]
 pub struct Cli {
@@ -21,39 +49,40 @@ pub enum Commands {
     Setup(SetupArgs),
 }
 
-#[derive(Parser, Debug, Clone)]
-pub struct SetupArgs {}
-
 #[derive(clap::ValueEnum, Clone, Debug)]
 pub enum PermissionProfile {
     ClusterReadonly,
-    NamespacedReadonly,
     Admin,
 }
 
-#[derive(Parser, Debug, Clone)]
-pub struct GenerateArgs {
-    /// Username to create
-    #[arg(short, long)]
-    pub user: String,
+impl PermissionProfile {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            PermissionProfile::Admin => "admin",
+            PermissionProfile::ClusterReadonly => "cluster-readonly",
+        }
+    }
+}
 
-    /// Group to assign user
-    #[arg(short, long)]
-    pub group: String,
+define_args! {
+    pub struct SetupArgs { }
+}
 
-    /// Restrict access to a namespace
-    #[arg(short, long)]
-    pub namespace: Option<String>,
+define_args! {
+    pub struct GenerateArgs {
+        /// Username to create
+        #[arg(short, long)]
+        pub user: String,
 
-    /// Path to master kubeconfig or one that has privilege to control RBAC
-    #[arg(long, default_value = DEFAULT_KUBECONFIG)]
-    pub kubeconfig: Option<String>,
+        #[arg(short, long, default_value = "./kubeconfig")]
+        output: String,
 
-    /// How long the kubeconfig should be valid (in hours)
-    #[arg(short, long, default_value_t = DEFAULT_VALIDITY_HOURS)]
-    pub expire: i32,
+        /// How long the kubeconfig should be valid (in hours)
+        #[arg(short, long, default_value_t = DEFAULT_VALIDITY_HOURS)]
+        pub expire: i32,
 
-    /// Predefined policies (Admin, Readonly)
-    #[arg(short, long)]
-    pub profile: PermissionProfile,
+        /// Predefined policies (Admin, Readonly)
+        #[arg(short, long)]
+        pub profile: PermissionProfile,
+    }
 }
