@@ -4,14 +4,14 @@ use clap::{Parser, Subcommand};
 const DEFAULT_KUBECONFIG: &str = "~/.kube/config";
 const DEFAULT_VALIDITY_HOURS: i32 = 24 * 30;
 
-#[derive(Parser, Debug)]
+#[derive(Parser, Debug, Clone)]
 #[command(version, about = "This is a package for you to create temporary safe kubeconfigs", long_about = None)]
 pub struct Cli {
     #[command(subcommand)]
     pub command: Commands,
 }
 
-#[derive(Subcommand, Debug)]
+#[derive(Subcommand, Debug, Clone)]
 pub enum Commands {
     /// Generates a kubeconfig with restricted access
     Generate(GenerateArgs),
@@ -21,7 +21,7 @@ pub enum Commands {
     Setup(SetupArgs),
 }
 
-#[derive(Parser, Debug)]
+#[derive(Parser, Debug, Clone)]
 pub struct SetupArgs {}
 
 #[derive(clap::ValueEnum, Clone, Debug)]
@@ -31,7 +31,7 @@ pub enum PermissionProfile {
     Admin,
 }
 
-#[derive(Parser, Debug)]
+#[derive(Parser, Debug, Clone)]
 pub struct GenerateArgs {
     /// Username to create
     #[arg(short, long)]

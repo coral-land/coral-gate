@@ -27,8 +27,8 @@ pub async fn generate_certificate(user: &str, group: &str) -> Result<GeneratedCs
     let mut distinguished_name = DistinguishedName::new();
     let mut params = CertificateParams::default();
 
-    distinguished_name.push(DnType::CommonName, user);
     distinguished_name.push(DnType::OrganizationName, group);
+    distinguished_name.push(DnType::CommonName, user);
 
     params.distinguished_name = distinguished_name;
     params.subject_alt_names = vec![];
